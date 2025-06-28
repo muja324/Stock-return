@@ -89,15 +89,15 @@ if symbol:
             st.write(f"**Estimated Resistance:** ₹{resistance:.2f}")
 
             st.subheader("📊 Compare with Another Stock")
-comp_symbol = st.text_input("Enter another stock (optional):", "SUNPHARMA.NS")
-if comp_symbol:
-    comp_data = yf.download(comp_symbol, start=start_date, end=end_date)
-    if not comp_data.empty and 'Close' in comp_data.columns:
-        comp_close = comp_data['Close']
-        combined = pd.concat([data['Close'], comp_close], axis=1)
-        combined.columns = [symbol, comp_symbol]
-        combined = combined.dropna()
-        if not combined.empty:
+            comp_symbol = st.text_input("Enter another stock (optional):", "SUNPHARMA.NS")
+            if comp_symbol:
+            comp_data = yf.download(comp_symbol, start=start_date, end=end_date)
+            if not comp_data.empty and 'Close' in comp_data.columns:
+            comp_close = comp_data['Close']
+            combined = pd.concat([data['Close'], comp_close], axis=1)
+            combined.columns = [symbol, comp_symbol]
+            combined = combined.dropna()
+            if not combined.empty:
             st.line_chart(combined)
         else:
             st.warning("Not enough overlapping data to compare.")
