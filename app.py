@@ -10,16 +10,42 @@ def safe_float(val):
         return float(val.iloc[0])
     return float(val)
 
-st.set_page_config(page_title="Stock Return Estimator", layout="centered")
-st.title("📈 Weekly Return Estimator")
-st.write("Estimate next week's return based on technical analysis.")
+# Forecast logic functions
+def forecast_logic(data, range_type):
+    latest = data.iloc[-1]
+    rsi = safe_float(latest['RSI'])
+    macd = safe_float(latest['MACD'])
+    signal = safe_float(latest['Signal'])
+    macd_diff = macd - signal
 
-symbol = st.text_input("Enter NSE stock symbol (e.g. AJANTPHARM.NS):", "AJANTPHARM.NS")
+    if range_type == "Weekly":
+        if rsi > 65 and macd_diff > 0:
+            return "Bullish", "+2% to +4%"
+        elif rsi < 40 and macd_diff < 0:
+            return "Bearish", "-2% to -4%"
+        else:
+            return "Sideways/Neutral", "-1% to +1%"
+
+    elif range_type == "Monthly":
+        if rsi > 65 and macd_diff > 0:
+            return "Bullish", "+4% to +7%"
+        elif rsi < 35 and macd_diff < 0:
+            return "Bearish", "-4% to -7%"
+        else:
+            return "Sideways/Neutral", "-2% to +2%"
+
+# Page setup
+st.set_page_config(page_title="Stock Return Estimator", layout="centered")
+st.title("📈 Stock Return Estimator")
+st.write("Estimate weekly/monthly return based on technical indicators.")
+
+symbol = st.text_input("Enter NSE stock symbol (e.g. TCS.NS):", "AJANTPHARM.NS")
+forecast_range = st.selectbox("Choose Forecast Range:", ["Weekly", "Monthly"])
 
 if symbol:
     end_date = datetime.today()
-    start_date = end_date - timedelta(days=90)
-    
+    start_date = end_date - timedelta(days=365)  # for both weekly/monthly indicators
+
     try:
         data = yf.download(symbol, start=start_date, end=end_date, progress=False)
 
@@ -49,7 +75,6 @@ if symbol:
             latest_rsi = safe_float(latest['RSI'])
             latest_macd = safe_float(latest['MACD'])
             latest_signal = safe_float(latest['Signal'])
-            macd_diff = latest_macd - latest_signal
 
             # 🧠 Technical Summary
             st.subheader(f"📊 Technical Summary for {symbol}")
@@ -58,25 +83,14 @@ if symbol:
             st.metric("MACD", f"{latest_macd:.2f}")
             st.metric("MACD Signal", f"{latest_signal:.2f}")
 
-            # 🔮 Basic Forecast
-            if latest_rsi > 65 and macd_diff > 0:
-                outlook = "Bullish"
-                expected_return = "+2% to +4%"
-            elif latest_rsi < 40 and macd_diff < 0:
-                outlook = "Bearish"
-                expected_return = "-2% to -4%"
-            else:
-                outlook = "Sideways/Neutral"
-                expected_return = "-1% to +1%"
-
-            st.subheader("📅 5-Day Forecast")
+            # 📅 Forecast
+            st.subheader(f"📅 {forecast_range} Forecast")
+            outlook, expected_return = forecast_logic(data, forecast_range)
             st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
 
-            # 📉 TradingView Full Interactive Chart
+            # 📉 TradingView Full Chart
             st.subheader("📉 Price Chart (TradingView)")
-
             tv_symbol = f"NSE:{symbol.replace('.NS', '')}"
-
             tradingview_full_chart = f"""
             <div class="tradingview-widget-container" style="height:500px;">
               <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
