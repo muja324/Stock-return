@@ -5,6 +5,11 @@ import streamlit as st
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
+def safe_float(val):
+    if isinstance(val, pd.Series):
+        return float(val.iloc[0])
+    return float(val)
+
 st.set_page_config(page_title="Stock Return Estimator", layout="centered")
 st.title("📈 Weekly Return Estimator")
 st.write("Estimate next week's return based on technical analysis.")
@@ -35,18 +40,16 @@ if symbol:
             data['20_MA'] = data['Close'].rolling(window=20).mean()
             data['50_MA'] = data['Close'].rolling(window=50).mean()
 
-            # ✅ Extract scalar values safely
             latest = data.iloc[-1]
-            latest_rsi = latest['RSI']
-            latest_macd = latest['MACD']
-            latest_signal = latest['Signal']
 
-            # Make sure they're floats (not Series accidentally)
-            latest_rsi = float(latest_rsi) if not np.isscalar(latest_rsi) else latest_rsi
-            macd_diff = float(latest_macd - latest_signal)
+            latest_close = safe_float(latest['Close'])
+            latest_rsi = safe_float(latest['RSI'])
+            latest_macd = safe_float(latest['MACD'])
+            latest_signal = safe_float(latest['Signal'])
+            macd_diff = latest_macd - latest_signal
 
             st.subheader(f"📊 Technical Summary for {symbol}")
-            st.metric("Latest Close", f"₹{latest['Close']:.2f}")
+            st.metric("Latest Close", f"₹{latest_close:.2f}")
             st.metric("RSI (14)", f"{latest_rsi:.2f}")
             st.metric("MACD", f"{latest_macd:.2f}")
             st.metric("MACD Signal", f"{latest_signal:.2f}")
@@ -80,8 +83,8 @@ if symbol:
 
             st.subheader("📍 Support & Resistance")
             recent_data = data.tail(30)
-            support = recent_data['Low'].min()
-            resistance = recent_data['High'].max()
+            support = safe_float(recent_data['Low'].min())
+            resistance = safe_float(recent_data['High'].max())
             st.write(f"**Estimated Support:** ₹{support:.2f}")
             st.write(f"**Estimated Resistance:** ₹{resistance:.2f}")
 
