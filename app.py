@@ -1,3 +1,4 @@
+# (Same imports)
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -39,20 +40,20 @@ st.set_page_config(page_title="Stock Return Estimator", layout="centered")
 st.title("📈 Stock Return Estimator")
 st.write("Estimate weekly/monthly return based on technical indicators.")
 
-symbol = st.text_input("Enter NSE stock symbol (e.g. TCS.NS):", "AJANTPHARM.NS")
+main_symbol = st.text_input("Enter NSE stock symbol (e.g. TCS.NS):", "AJANTPHARM.NS")
 forecast_range = st.selectbox("Choose Forecast Range:", ["Weekly", "Monthly"])
 
-if symbol:
+if main_symbol:
     end_date = datetime.today()
-    start_date = end_date - timedelta(days=365)  # for both weekly/monthly indicators
+    start_date = end_date - timedelta(days=365)
 
     try:
-        data = yf.download(symbol, start=start_date, end=end_date, progress=False)
+        data = yf.download(main_symbol, start=start_date, end=end_date, progress=False)
 
         if data.empty:
             st.warning("No data found for this symbol.")
         else:
-            # 👉 Technical Indicators
+            # Technical indicators
             data['Returns'] = data['Close'].pct_change()
             gain = data['Returns'].clip(lower=0)
             loss = -data['Returns'].clip(upper=0)
@@ -76,21 +77,21 @@ if symbol:
             latest_macd = safe_float(latest['MACD'])
             latest_signal = safe_float(latest['Signal'])
 
-            # 🧠 Technical Summary
-            st.subheader(f"📊 Technical Summary for {symbol}")
+            # Summary
+            st.subheader(f"📊 Technical Summary for {main_symbol}")
             st.metric("Latest Close", f"₹{latest_close:.2f}")
             st.metric("RSI (14)", f"{latest_rsi:.2f}")
             st.metric("MACD", f"{latest_macd:.2f}")
             st.metric("MACD Signal", f"{latest_signal:.2f}")
 
-            # 📅 Forecast
+            # Forecast
             st.subheader(f"📅 {forecast_range} Forecast")
             outlook, expected_return = forecast_logic(data, forecast_range)
             st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
 
-            # 📉 TradingView Full Chart
+            # TradingView chart
             st.subheader("📉 Price Chart (TradingView)")
-            tv_symbol = f"NSE:{symbol.replace('.NS', '')}"
+            tv_symbol = f"{main_symbol.replace('.NS', '')}"
             tradingview_full_chart = f"""
             <div class="tradingview-widget-container" style="height:500px;">
               <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
@@ -115,7 +116,7 @@ if symbol:
             """
             st.components.v1.html(tradingview_full_chart, height=500)
 
-            # 🧲 Support & Resistance
+            # Support & Resistance
             st.subheader("📍 Support & Resistance")
             recent_data = data.tail(30)
             support = safe_float(recent_data['Low'].min())
@@ -123,17 +124,17 @@ if symbol:
             st.write(f"**Estimated Support:** ₹{support:.2f}")
             st.write(f"**Estimated Resistance:** ₹{resistance:.2f}")
 
-            # 📊 Compare with Another Stock
+            # Compare with Another Stock
             st.subheader("📊 Compare with Another Stock")
-            comp_symbol = st.text_input("Enter another stock (optional):", "SUNPHARMA.NS")
+            compare_symbol = st.text_input("Enter another stock (optional):", "SUNPHARMA.NS")
 
-            if comp_symbol.strip() != "":
+            if compare_symbol.strip() != "":
                 try:
-                    comp_data = yf.download(comp_symbol, start=start_date, end=end_date, progress=False)
+                    comp_data = yf.download(compare_symbol, start=start_date, end=end_date, progress=False)
 
                     if not comp_data.empty and 'Close' in comp_data.columns:
-                        comp_close = comp_data['Close'].rename(comp_symbol)
-                        main_close = data['Close'].rename(symbol)
+                        comp_close = comp_data['Close'].rename(compare_symbol)
+                        main_close = data['Close'].rename(main_symbol)
 
                         combined = pd.concat([main_close, comp_close], axis=1).dropna()
 
@@ -142,15 +143,15 @@ if symbol:
                         else:
                             st.warning("Not enough overlapping data between the two stocks to compare.")
                     else:
-                        st.warning(f"No 'Close' data found for {comp_symbol}.")
+                        st.warning(f"No 'Close' data found for {compare_symbol}.")
                 except Exception as e:
                     st.error(f"Error fetching comparison data: {e}")
             else:
                 st.info("Enter a stock symbol above to compare.")
 
-            # 📤 Export Placeholder
+            # Export placeholder
             st.subheader("📤 Export Report")
             st.write("🔒 PDF export feature coming soon in hosted version!")
 
     except Exception as e:
-        st.error(f"❌ Error fetching data for {symbol}: {e}")
+        st.error(f"❌ Error fetching data for {main_symbol}: {e}")
