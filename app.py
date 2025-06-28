@@ -4,7 +4,6 @@ import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import streamlit.components.v1 as components
 
 def safe_float(val):
     if isinstance(val, pd.Series):
@@ -27,7 +26,7 @@ if symbol:
         if data.empty:
             st.warning("No data found for this symbol.")
         else:
-            # 👉 Calculate Technical Indicators
+            # 👉 Technical Indicators
             data['Returns'] = data['Close'].pct_change()
             gain = data['Returns'].clip(lower=0)
             loss = -data['Returns'].clip(upper=0)
@@ -72,14 +71,17 @@ if symbol:
             st.subheader("📅 5-Day Forecast")
             st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
 
-            # 📉 TradingView Chart
+            # 📉 TradingView Candlestick Chart Embed
             st.subheader("📉 Price Chart (TradingView)")
-            tv_symbol = symbol.replace(".NS", "NSE:")
-            tradingview_widget = f"""
-            <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_{tv_symbol}&symbol={tv_symbol}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=F1F3F6&studies=[]&theme=light&style=1&timezone=Asia/Kolkata&withdateranges=1&hidevolume=0&hidelegend=0&width=100%&height=500" 
-            width="100%" height="500" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
+            tv_symbol = symbol.replace(".NS", "NSE")  # AJANTPHARM.NS → AJANTPHARMNSE
+            tradingview_html = f"""
+            <div class="tradingview-widget-container" style="width:100%; height:420px;">
+              <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol={tv_symbol}&locale=en"
+                width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no">
+              </iframe>
+            </div>
             """
-            components.html(tradingview_widget, height=520)
+            st.components.v1.html(tradingview_html, height=420)
 
             # 🧲 Support & Resistance
             st.subheader("📍 Support & Resistance")
