@@ -70,18 +70,36 @@ if symbol:
                 expected_return = "-1% to +1%"
             st.subheader("📅 5-Day Forecast")
             st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
+            # 📉 TradingView Full Interactive Chart
+st.subheader("📉 Price Chart (TradingView)")
 
-            # 📉 TradingView Candlestick Chart Embed
-            st.subheader("📉 Price Chart (TradingView)")
-            tv_symbol = symbol.replace(".NS", "NSE")  # AJANTPHARM.NS → AJANTPHARMNSE
-            tradingview_html = f"""
-            <div class="tradingview-widget-container" style="width:100%; height:420px;">
-              <iframe src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?symbol={tv_symbol}&locale=en"
-                width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no">
-              </iframe>
-            </div>
-            """
-            st.components.v1.html(tradingview_html, height=420)
+# ✅ Format symbol for TradingView (e.g., NSE:TCS)
+tv_symbol = f"NSE:{symbol.replace('.NS', '')}"
+
+tradingview_full_chart = f"""
+<div class="tradingview-widget-container" style="height:500px;">
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <script type="text/javascript">
+    new TradingView.widget({{
+      "width": "100%",
+      "height": 500,
+      "symbol": "{tv_symbol}",
+      "interval": "D",
+      "timezone": "Asia/Kolkata",
+      "theme": "dark",
+      "style": "1",
+      "locale": "en",
+      "toolbar_bg": "#f1f3f6",
+      "enable_publishing": false,
+      "allow_symbol_change": true,
+      "container_id": "tradingview_chart"
+    }});
+  </script>
+  <div id="tradingview_chart"></div>
+</div>
+"""
+
+st.components.v1.html(tradingview_full_chart, height=500)
 
             # 🧲 Support & Resistance
             st.subheader("📍 Support & Resistance")
