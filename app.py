@@ -83,9 +83,17 @@ if symbol:
             comp_symbol = st.text_input("Enter another stock (optional):", "SUNPHARMA.NS")
             if comp_symbol:
                 comp_data = yf.download(comp_symbol, start=start_date, end=end_date)['Close']
-                compare_df = pd.DataFrame({symbol: data['Close'], comp_symbol: comp_data})
-                compare_df = compare_df.dropna()
-                st.line_chart(compare_df)
+                if not comp_data.empty:
+                    compare_df = pd.DataFrame({
+                        symbol: data['Close'],
+                        comp_symbol: comp_data
+                    }).dropna()
+                    if not compare_df.empty:
+                        st.line_chart(compare_df)
+                    else:
+                        st.warning("Not enough overlapping data to compare.")
+                else:
+                    st.warning("No data returned for comparison symbol.")
 
             st.subheader("📤 Export Report")
             st.write("🔒 PDF export feature coming soon in hosted version!")
