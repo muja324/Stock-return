@@ -26,9 +26,11 @@ if symbol:
             data['Returns'] = data['Close'].pct_change()
 
             # RSI Calculation
-            mean_gain = data['Returns'].clip(lower=0).rolling(window=14).mean()
-            mean_loss = -data['Returns'].clip(upper=0).rolling(window=14).mean()
-            rs = mean_gain / (mean_loss + 1e-10)
+            gain = data['Returns'].clip(lower=0)
+            loss = -data['Returns'].clip(upper=0)
+            avg_gain = gain.rolling(window=14).mean()
+            avg_loss = loss.rolling(window=14).mean()
+            rs = avg_gain / (avg_loss + 1e-10)
             data['RSI'] = 100 - (100 / (1 + rs))
 
             # MACD
@@ -46,10 +48,12 @@ if symbol:
             st.metric("MACD", f"{latest['MACD']:.2f}" if pd.notnull(latest['MACD']) else "N/A")
             st.metric("MACD Signal", f"{latest['Signal']:.2f}" if pd.notnull(latest['Signal']) else "N/A")
 
-            # 🔮 Return Estimation
+            # 🔮 Weekly Return Estimation
             try:
                 rsi = float(latest['RSI'])
-                macd_diff = float(latest['MACD'] - latest['Signal'])
+                macd = float(latest['MACD'])
+                signal = float(latest['Signal'])
+                macd_diff = macd - signal
 
                 if rsi > 65 and macd_diff > 0:
                     outlook = "Bullish"
@@ -64,7 +68,7 @@ if symbol:
                 st.subheader("📅 5-Day Forecast")
                 st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
             except:
-                st.warning("⚠️ Unable to calculate forecast — some data missing.")
+                st.warning("⚠️ Forecast unavailable — RSI or MACD missing.")
 
             # 📉 Candlestick Chart
             st.subheader("📉 Price Chart (Candlestick)")
