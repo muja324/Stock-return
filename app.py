@@ -68,38 +68,38 @@ if symbol:
             else:
                 outlook = "Sideways/Neutral"
                 expected_return = "-1% to +1%"
+
             st.subheader("📅 5-Day Forecast")
             st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
+
             # 📉 TradingView Full Interactive Chart
-st.subheader("📉 Price Chart (TradingView)")
+            st.subheader("📉 Price Chart (TradingView)")
 
-# ✅ Format symbol for TradingView (e.g., NSE:TCS)
-tv_symbol = f"NSE:{symbol.replace('.NS', '')}"
+            tv_symbol = f"NSE:{symbol.replace('.NS', '')}"
 
-tradingview_full_chart = f"""
-<div class="tradingview-widget-container" style="height:500px;">
-  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-  <script type="text/javascript">
-    new TradingView.widget({{
-      "width": "100%",
-      "height": 500,
-      "symbol": "{tv_symbol}",
-      "interval": "D",
-      "timezone": "Asia/Kolkata",
-      "theme": "dark",
-      "style": "1",
-      "locale": "en",
-      "toolbar_bg": "#f1f3f6",
-      "enable_publishing": false,
-      "allow_symbol_change": true,
-      "container_id": "tradingview_chart"
-    }});
-  </script>
-  <div id="tradingview_chart"></div>
-</div>
-"""
-
-st.components.v1.html(tradingview_full_chart, height=500)
+            tradingview_full_chart = f"""
+            <div class="tradingview-widget-container" style="height:500px;">
+              <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+              <script type="text/javascript">
+                new TradingView.widget({{
+                  "width": "100%",
+                  "height": 500,
+                  "symbol": "{tv_symbol}",
+                  "interval": "D",
+                  "timezone": "Asia/Kolkata",
+                  "theme": "dark",
+                  "style": "1",
+                  "locale": "en",
+                  "toolbar_bg": "#f1f3f6",
+                  "enable_publishing": false,
+                  "allow_symbol_change": true,
+                  "container_id": "tradingview_chart"
+                }});
+              </script>
+              <div id="tradingview_chart"></div>
+            </div>
+            """
+            st.components.v1.html(tradingview_full_chart, height=500)
 
             # 🧲 Support & Resistance
             st.subheader("📍 Support & Resistance")
