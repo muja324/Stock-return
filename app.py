@@ -39,7 +39,7 @@ if symbol:
 
             latest = data.iloc[-1]
 
-            # 🧾 Display Technical Metrics
+            # 📊 Technical Metrics
             st.subheader(f"📊 Technical Summary for {symbol}")
             st.metric("Latest Close", f"₹{latest['Close']:.2f}" if pd.notnull(latest['Close']) else "N/A")
             st.metric("RSI (14)", f"{latest['RSI']:.2f}" if pd.notnull(latest['RSI']) else "N/A")
@@ -47,21 +47,24 @@ if symbol:
             st.metric("MACD Signal", f"{latest['Signal']:.2f}" if pd.notnull(latest['Signal']) else "N/A")
 
             # 🔮 Return Estimation
-            rsi = latest['RSI']
-            macd_diff = latest['MACD'] - latest['Signal']
+            try:
+                rsi = float(latest['RSI'])
+                macd_diff = float(latest['MACD'] - latest['Signal'])
 
-            if rsi > 65 and macd_diff > 0:
-                outlook = "Bullish"
-                expected_return = "+2% to +4%"
-            elif rsi < 40 and macd_diff < 0:
-                outlook = "Bearish"
-                expected_return = "-2% to -4%"
-            else:
-                outlook = "Sideways/Neutral"
-                expected_return = "-1% to +1%"
+                if rsi > 65 and macd_diff > 0:
+                    outlook = "Bullish"
+                    expected_return = "+2% to +4%"
+                elif rsi < 40 and macd_diff < 0:
+                    outlook = "Bearish"
+                    expected_return = "-2% to -4%"
+                else:
+                    outlook = "Sideways/Neutral"
+                    expected_return = "-1% to +1%"
 
-            st.subheader("📅 5-Day Forecast")
-            st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
+                st.subheader("📅 5-Day Forecast")
+                st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
+            except:
+                st.warning("⚠️ Unable to calculate forecast — some data missing.")
 
             # 📉 Candlestick Chart
             st.subheader("📉 Price Chart (Candlestick)")
@@ -78,7 +81,7 @@ if symbol:
             fig.update_layout(xaxis_rangeslider_visible=False)
             st.plotly_chart(fig, use_container_width=True)
 
-            # 📍 Support and Resistance
+            # 📍 Support & Resistance
             st.subheader("📍 Support & Resistance")
             recent_data = data.tail(30)
             support = recent_data['Low'].min()
@@ -86,7 +89,7 @@ if symbol:
             st.write(f"**Estimated Support:** ₹{support:.2f}")
             st.write(f"**Estimated Resistance:** ₹{resistance:.2f}")
 
-            # 📊 Multi-stock comparison
+            # 🔁 Compare with another stock
             st.subheader("📊 Compare with Another Stock")
             comp_symbol = st.text_input("Enter another stock (optional):", "SUNPHARMA.NS")
             if comp_symbol:
@@ -95,7 +98,7 @@ if symbol:
                 compare_df.dropna(inplace=True)
                 st.line_chart(compare_df)
 
-            # 📤 Export (Placeholder)
+            # 📤 Export Report
             st.subheader("📤 Export Report")
             st.write("🔒 PDF export feature coming soon in hosted version!")
 
