@@ -35,15 +35,21 @@ if symbol:
             data['20_MA'] = data['Close'].rolling(window=20).mean()
             data['50_MA'] = data['Close'].rolling(window=50).mean()
 
+            # ✅ Extract scalar values safely
             latest = data.iloc[-1]
-            latest_rsi = float(latest['RSI'])
-            macd_diff = float(latest['MACD'] - latest['Signal'])
+            latest_rsi = latest['RSI']
+            latest_macd = latest['MACD']
+            latest_signal = latest['Signal']
+
+            # Make sure they're floats (not Series accidentally)
+            latest_rsi = float(latest_rsi) if not np.isscalar(latest_rsi) else latest_rsi
+            macd_diff = float(latest_macd - latest_signal)
 
             st.subheader(f"📊 Technical Summary for {symbol}")
             st.metric("Latest Close", f"₹{latest['Close']:.2f}")
             st.metric("RSI (14)", f"{latest_rsi:.2f}")
-            st.metric("MACD", f"{latest['MACD']:.2f}")
-            st.metric("MACD Signal", f"{latest['Signal']:.2f}")
+            st.metric("MACD", f"{latest_macd:.2f}")
+            st.metric("MACD Signal", f"{latest_signal:.2f}")
 
             if latest_rsi > 65 and macd_diff > 0:
                 outlook = "Bullish"
@@ -93,7 +99,7 @@ if symbol:
                     else:
                         st.warning("Not enough overlapping data to compare.")
                 else:
-                    st.warning("No data returned for comparison symbol.")
+                    st.warning("No data found for comparison symbol.")
 
             st.subheader("📤 Export Report")
             st.write("🔒 PDF export feature coming soon in hosted version!")
