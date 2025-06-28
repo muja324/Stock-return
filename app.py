@@ -10,16 +10,16 @@ st.title("📈 Weekly Return Estimator")
 st.write("Estimate next week's return based on technical analysis.")
 
 # User input
-symbol = st.text_input("Enter NSE stock symbol (e.g. AJANTPHARM.NS):", "AJANTPHARM.NS")
+symbol = st.text_input("Enter NSE stock symbol (e.g. AJANTPHARM.NS):", "AJANTPHARM.NS").strip()
 
-if symbol:
+if isinstance(symbol, str) and len(symbol) > 0:
     end_date = datetime.today()
     start_date = end_date - timedelta(days=90)
 
     try:
         data = yf.download(symbol, start=start_date, end=end_date)
 
-        if not data.empty:
+        if data is not None and not data.empty:
             # Technical Indicators
             data['20_MA'] = data['Close'].rolling(window=20).mean()
             data['50_MA'] = data['Close'].rolling(window=50).mean()
@@ -41,14 +41,14 @@ if symbol:
 
             latest = data.iloc[-1]
 
-            # 📊 Technical Metrics
+            # Metrics
             st.subheader(f"📊 Technical Summary for {symbol}")
             st.metric("Latest Close", f"₹{latest['Close']:.2f}" if pd.notnull(latest['Close']) else "N/A")
             st.metric("RSI (14)", f"{latest['RSI']:.2f}" if pd.notnull(latest['RSI']) else "N/A")
             st.metric("MACD", f"{latest['MACD']:.2f}" if pd.notnull(latest['MACD']) else "N/A")
             st.metric("MACD Signal", f"{latest['Signal']:.2f}" if pd.notnull(latest['Signal']) else "N/A")
 
-            # 🔮 Weekly Return Estimation
+            # Return Forecast
             try:
                 rsi = float(latest['RSI'])
                 macd = float(latest['MACD'])
@@ -68,9 +68,9 @@ if symbol:
                 st.subheader("📅 5-Day Forecast")
                 st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
             except:
-                st.warning("⚠️ Forecast unavailable — RSI or MACD missing.")
+                st.warning("⚠️ Forecast not available due to missing indicator values.")
 
-            # 📉 Candlestick Chart
+            # Chart
             st.subheader("📉 Price Chart (Candlestick)")
             fig = go.Figure(data=[
                 go.Candlestick(x=data.index,
@@ -85,7 +85,7 @@ if symbol:
             fig.update_layout(xaxis_rangeslider_visible=False)
             st.plotly_chart(fig, use_container_width=True)
 
-            # 📍 Support & Resistance
+            # Support & Resistance
             st.subheader("📍 Support & Resistance")
             recent_data = data.tail(30)
             support = recent_data['Low'].min()
@@ -93,16 +93,16 @@ if symbol:
             st.write(f"**Estimated Support:** ₹{support:.2f}")
             st.write(f"**Estimated Resistance:** ₹{resistance:.2f}")
 
-            # 🔁 Compare with another stock
+            # Compare with Another Stock
             st.subheader("📊 Compare with Another Stock")
-            comp_symbol = st.text_input("Enter another stock (optional):", "SUNPHARMA.NS")
+            comp_symbol = st.text_input("Enter another stock (optional):", "SUNPHARMA.NS").strip()
             if comp_symbol:
                 comp_data = yf.download(comp_symbol, start=start_date, end=end_date)['Close']
                 compare_df = pd.DataFrame({symbol: data['Close'], comp_symbol: comp_data})
                 compare_df.dropna(inplace=True)
                 st.line_chart(compare_df)
 
-            # 📤 Export Report
+            # PDF Export Placeholder
             st.subheader("📤 Export Report")
             st.write("🔒 PDF export feature coming soon in hosted version!")
 
