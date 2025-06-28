@@ -66,8 +66,8 @@ if symbol:
                 outlook = "Bearish"
                 expected_return = "-2% to -4%"
             else:
-                outlook = "Side expected_return = "-1% to +1%"
-
+                outlook = "Sideways/Neutral"
+                expected_return = "-1% to +1%"
             st.subheader("📅 5-Day Forecast")
             st.info(f"**Outlook:** {outlook}\n\n**Expected Return Range:** {expected_return}")
 
